@@ -9,6 +9,15 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// Serve frontend in production
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "frontend/build")));
+
+    app.get("*", (req, res) => {
+        res.sendFile(path.join(__dirname, "frontend/build", "index.html"));
+    });
+}
+
 // Database connection
 const db = mysql.createPool({
     host: process.env.DB_HOST,
