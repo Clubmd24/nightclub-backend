@@ -45,7 +45,7 @@ app.get('/till-cash', (req, res) => {
     });
 });
 
-// ✅ Close DB connection on SIGTERM (Heroku shutdown)
+// ✅ Handle server shutdown properly
 process.on('SIGTERM', () => {
     console.log('❌ Received SIGTERM. Closing app...');
     db.end(() => {
@@ -55,10 +55,18 @@ process.on('SIGTERM', () => {
 });
 
 // ✅ Ensure PORT is assigned correctly
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 
-if (!module.parent) {  // Prevent multiple instances
+// Check if the app is already running to avoid multiple instances
+if (!module.parent) {
     app.listen(PORT, () => {
         console.log(`🚀 Server running on port ${PORT}`);
+    }).on("error", (err) => {
+        if (err.code === "EADDRINUSE") {
+            console.error(`❌ Port ${PORT} is already in use. Exiting...`);
+            process.exit(1);
+        } else {
+            throw err;
+        }
     });
 }
