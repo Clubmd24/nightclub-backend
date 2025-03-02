@@ -1,4 +1,11 @@
-require('dotenv').config();
+require('dotenv').config(); // Load .env variables
+
+console.log("DB_HOST:", process.env.DB_HOST);
+console.log("DB_USER:", process.env.DB_USER);
+console.log("DB_PASS:", process.env.DB_PASS ? '****' : 'Not Set'); // Hide password for security
+console.log("DB_NAME:", process.env.DB_NAME);
+console.log("DB_PORT:", process.env.DB_PORT);
+
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -7,18 +14,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Default route for Heroku health check (prevents idle shutdown)
-app.get('/', (req, res) => {
-    res.send("🚀 API is running!");
-});
-
-// ✅ Ensure Heroku assigns a dynamic port
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-});
-
-// ✅ Database connection with keep-alive
+// Database connection
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -30,21 +26,18 @@ const db = mysql.createConnection({
 db.connect(err => {
     if (err) {
         console.error('❌ Database connection failed:', err);
-        process.exit(1);
+        process.exit(1); // Exit process if DB fails
     } else {
-        console.log('✅ Connected to MariaDB (ClearDB)');
+        console.log('✅ Connected to MariaDB');
     }
 });
 
-// ✅ Prevent Heroku from closing idle DB connections
-setInterval(() => {
-    db.ping((err) => {
-        if (err) console.error('❌ Database ping failed:', err);
-        else console.log('✅ Database connection is alive');
-    });
-}, 60000); // Ping every 60 seconds
+// ✅ Default route for health check
+app.get('/', (req, res) => {
+    res.send("✅ API is running!");
+});
 
-// ✅ API to fetch till cash data
+// API to fetch till cash data
 app.get('/till-cash', (req, res) => {
     db.query('SELECT * FROM till_cash_control', (err, results) => {
         if (err) return res.status(500).send(err);
@@ -52,21 +45,20 @@ app.get('/till-cash', (req, res) => {
     });
 });
 
-// ✅ Graceful shutdown handling
+// ✅ Close DB connection on SIGTERM (Heroku shutdown)
 process.on('SIGTERM', () => {
-    console.log("❌ Received SIGTERM. Closing app...");
+    console.log('❌ Received SIGTERM. Closing app...');
     db.end(() => {
         console.log('✅ Database connection closed');
         process.exit(0);
     });
 });
 
-// ✅ Keep Heroku app alive (Ping every 5 minutes)
-setInterval(() => {
-    require("http").get("https://nightclubapp.herokuapp.com/");
-}, 300000); // Every 5 minutes (300,000 ms)
+// ✅ Ensure PORT is assigned correctly
+const PORT = process.env.PORT || 5001;
 
-// ✅ Start the server
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-});
+if (!module.parent) {  // Prevent multiple instances
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+    });
+}
