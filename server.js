@@ -31,6 +31,11 @@ db.connect(err => {
     }
 });
 
+// ✅ Default route for Heroku health check
+app.get('/', (req, res) => {
+    res.send("API is running!");
+});
+
 // API to fetch till cash data
 app.get('/till-cash', (req, res) => {
     db.query('SELECT * FROM till_cash_control', (err, results) => {
