@@ -7,9 +7,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Default route for health check (prevents auto-sleep)
+// ✅ Default route for Heroku health check (prevents idle shutdown)
 app.get('/', (req, res) => {
-    res.send("API is running! 🚀");
+    res.send("🚀 API is running!");
 });
 
 // ✅ Ensure Heroku assigns a dynamic port
@@ -57,6 +57,11 @@ process.on('SIGTERM', () => {
         process.exit(0);
     });
 });
+
+// ✅ Keep Heroku app alive (Ping every 5 minutes)
+setInterval(() => {
+    require("http").get("https://nightclubapp.herokuapp.com/");
+}, 300000); // Every 5 minutes (300,000 ms)
 
 // ✅ Start the server
 app.listen(PORT, () => {
