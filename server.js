@@ -1,12 +1,13 @@
 require('dotenv').config(); // Load environment variables
 
+const path = require("path");  // ✅ Import path module
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.static(path.join(__dirname, "frontend/build")));
 
 // ✅ Use environment variables for database connection
 const db = mysql.createConnection({
