@@ -2,7 +2,8 @@
 "name": "frontend",
 "version": "1.0.0",
 "engines": {
-  "node": "20.x"
+  "node": "20.x",
+  "npm": "11.2.0"
 },
 "private": true,
 "homepage": "https://nightclubapp-56121564c956.herokuapp.com/",
