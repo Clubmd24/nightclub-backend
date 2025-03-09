@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Make sure useState and useEffect are imported from 'react'
+import React, { useState, useEffect } from 'react';  // Ensure this import is correct
 
 function App() {
   const [tillCash, setTillCash] = useState([]);  // Correctly using useState
