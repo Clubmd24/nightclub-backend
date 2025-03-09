@@ -1,5 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // Make sure useState and useEffect are imported from 'react'
 
 function App() {
   const [tillCash, setTillCash] = useState([]);  // Correctly using useState
