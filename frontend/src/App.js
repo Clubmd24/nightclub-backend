@@ -4,7 +4,8 @@ function App() {
   const [tillCash, setTillCash] = useState([]);
 
   useEffect(() => {
-    fetch("/till-cash")  // Backend API
+    // Fetch data from the backend API
+    fetch("/till-cash")  // Assuming your backend endpoint is '/till-cash'
       .then((res) => res.json())
       .then((data) => setTillCash(data))
       .catch((err) => console.error("Error fetching data:", err));
@@ -14,6 +15,7 @@ function App() {
     <div>
       <h1>Nightclub Till Cash Control</h1>
       <ul>
+        {/* Render each item in the tillCash array */}
         {tillCash.map((item, index) => (
           <li key={index}>
             {item.name} - ${item.amount}
