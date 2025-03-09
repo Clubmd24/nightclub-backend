@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import React, { useState, useEffect } from 'react'; // Import React and hooks
+import { BrowserRouter, Routes, Route } from 'react-router-dom'; // Import Routes and Route
 
 // Home component to display till cash control info
 function Home() {
@@ -44,14 +44,22 @@ function About() {
 
 // Main App component
 function App() {
+  const [tillCash, setTillCash] = useState([]);
+
+  useEffect(() => {
+    fetch("/till-cash") // Backend API endpoint
+      .then((res) => res.json())
+      .then((data) => setTillCash(data))
+      .catch((err) => console.error("Error fetching data:", err));
+  }, []);
+
   return (
-    <Router>
-      <Switch>
-        <Route exact path="/" component={Home} />
-        <Route path="/about" component={About} />
-        {/* Add additional routes as needed */}
-      </Switch>
-    </Router>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<h1>Nightclub Till Cash Control</h1>} />
+        {/* You can add more routes here */}
+      </Routes>
+    </BrowserRouter>
   );
 }
 
