@@ -4,6 +4,7 @@
     "node": "20.x"
   },
   "private": true,
+  "homepage": "https://nightclubapp-56121564c956.herokuapp.com/",
   "dependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
