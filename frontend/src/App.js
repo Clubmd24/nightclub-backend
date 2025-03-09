@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import React from 'react';
 
 function App() {
   const [tillCash, setTillCash] = useState([]);  // Correctly using useState
