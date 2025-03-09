@@ -10,7 +10,7 @@
     "build": "export NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
     "client-install": "cd frontend && npm install",
     "client-build": "cd frontend && npm run build",
-    "heroku-postbuild": "npm run client-install && npm run client-build"
+    "heroku-postbuild": "cd frontend && npm install && npm run build"
   },
   "dependencies": {
     "body-parser": "^1.20.3",
