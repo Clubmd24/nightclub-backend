@@ -60,17 +60,21 @@ app.post('/till-cash/declare-float', (req, res) => {
 // 📌 POST End-of-Day Cash Count
 app.post('/till-cash/end-of-day', (req, res) => {
     const { manager_id, fifty, twenty, ten, five, two, one, fifty_p, twenty_p, ten_p, five_p, copper, expected_total, pdq_total } = req.body;
-    const actual_cash = (50 * fifty) + (20 * twenty) + (10 * ten) + (5 * five) + (2 * two) + (1 * one) +
-                         (0.5 * fifty_p) + (0.2 * twenty_p) + (0.1 * ten_p) + (0.05 * five_p) + (0.01 * copper);
-    const variance = actual_cash + pdq_total - expected_total;
+    
+    if (!manager_id) return res.status(400).json({ error: "Manager ID is required" });
 
-    db.query('INSERT INTO till_cash_control (manager_id, type, cash_amount) VALUES (?, ?, ?)',
-    [manager_id, 'float', total_float],
+    const actual_cash = (50 * fifty) + (20 * twenty) + (10 * ten) + (5 * five) + (2 * two) + (1 * one) +
+                        (0.5 * fifty_p) + (0.2 * twenty_p) + (0.1 * ten_p) + (0.05 * five_p) + (0.01 * copper);
+    const variance = (actual_cash + pdq_total - expected_total).toFixed(2);
+
+    db.query('INSERT INTO till_cash_control (manager_id, type, fifty, twenty, ten, five, two, one, fifty_p, twenty_p, ten_p, five_p, copper, total_amount, variance) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [manager_id, 'end-of-day', fifty, twenty, ten, five, two, one, fifty_p, twenty_p, ten_p, five_p, copper, actual_cash, variance],
     (err, results) => {
-        if (err) return res.status(500).send(err);
+        if (err) return res.status(500).send({ error: err.message });
         res.json({ message: "End-of-Day cash count recorded", actual_cash, variance });
     });
 });
+
 
 // 📌 GET Payroll Report
 app.get('/payroll', (req, res) => {
