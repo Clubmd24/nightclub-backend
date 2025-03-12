@@ -12,7 +12,6 @@ app.use(bodyParser.json());
 // Serve frontend in production
 if (process.env.NODE_ENV === "production") {
     app.use(express.static(path.join(__dirname, "frontend/build")));
-
     app.get("*", (req, res) => {
         res.sendFile(path.join(__dirname, "frontend/build", "index.html"));
     });
@@ -104,6 +103,33 @@ app.get('/messages', (req, res) => {
         res.json(results);
     });
 });
+
+// 📌 POST Clock In
+app.post('/clock-in', (req, res) => {
+    const { user_id, latitude, longitude } = req.body;
+    const shift_start = new Date();
+
+    db.query('INSERT INTO clock_ins (user_id, clock_in, latitude, longitude) VALUES (?, ?, ?, ?)',
+    [user_id, shift_start, latitude, longitude],
+    (err, results) => {
+        if (err) return res.status(500).send(err);
+        res.json({ message: "Clock-in successful" });
+    });
+});
+
+// 📌 POST Clock Out
+app.post('/clock-out', (req, res) => {
+    const { user_id } = req.body;
+    const shift_end = new Date();
+
+    db.query('UPDATE clock_ins SET clock_out = ? WHERE user_id = ? AND clock_out IS NULL',
+    [shift_end, user_id],
+    (err, results) => {
+        if (err) return res.status(500).send(err);
+        res.json({ message: "Clock-out successful" });
+    });
+});
+
 
 // Start the server
 const PORT = process.env.PORT || 5001;
