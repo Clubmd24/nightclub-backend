@@ -2,16 +2,25 @@ import React, { useEffect, useState } from 'react';
 
 function App() {
   const [tillCash, setTillCash] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetch('https://nightclubapp-56121564c956.herokuapp.com/till-cash')
-      .then(response => response.json())
-      .then(data => {
-        console.log("API Response:", data);
-        setTillCash(data);
-      })
-      .catch(error => console.error("Error fetching till cash:", error));
-  }, []);
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log("API Response:", data);
+      setTillCash(data);
+    })
+    .catch(error => {
+      console.error("Error fetching till cash:", error);
+      setError("Error fetching till cash data. Please try again.");
+    });
+}, []);
 
   return (
     <div>
