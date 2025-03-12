@@ -9,6 +9,20 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// 📌 GET Payroll Report
+app.get('/payroll', (req, res) => {
+    db.query(`SELECT users.id, users.name, shifts.allocated_hours, 
+                     SUM(TIMESTAMPDIFF(HOUR, clock_in, clock_out)) AS claimed_hours 
+              FROM users 
+              JOIN shifts ON users.id = shifts.user_id 
+              LEFT JOIN clock_ins ON users.id = clock_ins.user_id 
+              GROUP BY users.id, users.name, shifts.allocated_hours`, 
+    (err, results) => {
+        if (err) return res.status(500).send(err);
+        res.json(results);
+    });
+});
+
 // Serve frontend in production
 if (process.env.NODE_ENV === "production") {
     app.use(express.static(path.join(__dirname, "frontend/build")));
@@ -74,25 +88,6 @@ app.post('/till-cash/end-of-day', (req, res) => {
         res.json({ message: "End-of-Day cash count recorded", actual_cash, variance });
     });
 });
-
-
-// 📌 GET Payroll Report
-app.get('/payroll', (req, res) => {
-    const query = `
-        SELECT users.id, users.name, 
-               IFNULL(shifts.allocated_hours, 0) AS allocated_hours, 
-               IFNULL(SUM(TIMESTAMPDIFF(HOUR, clock_ins.clock_in, clock_ins.clock_out)), 0) AS claimed_hours 
-        FROM users
-        LEFT JOIN shifts ON users.id = shifts.user_id 
-        LEFT JOIN clock_ins ON users.id = clock_ins.user_id 
-        GROUP BY users.id, users.name, shifts.allocated_hours`;
-
-    db.query(query, (err, results) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(results);
-    });
-});
-
 
 // 📌 Message Board Endpoints
 app.post('/messages', (req, res) => {
