@@ -10,18 +10,29 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // 📌 GET Payroll Report
-app.get('/payroll', (req, res) => {
-    db.query(`SELECT users.id, users.name, shifts.allocated_hours, 
-                     SUM(TIMESTAMPDIFF(HOUR, clock_in, clock_out)) AS claimed_hours 
-              FROM users 
-              JOIN shifts ON users.id = shifts.user_id 
-              LEFT JOIN clock_ins ON users.id = clock_ins.user_id 
-              GROUP BY users.id, users.name, shifts.allocated_hours`, 
+const { Parser } = require('json2csv');
+
+app.get('/payroll/export', (req, res) => {
+    db.query(`
+        SELECT users.id, users.name, shifts.allocated_hours, 
+               SUM(TIMESTAMPDIFF(HOUR, clock_in, clock_out)) AS claimed_hours 
+        FROM users 
+        JOIN shifts ON users.id = shifts.user_id 
+        LEFT JOIN clock_ins ON users.id = clock_ins.user_id 
+        GROUP BY users.id, users.name, shifts.allocated_hours`, 
     (err, results) => {
         if (err) return res.status(500).send(err);
-        res.json(results);
+
+        const fields = ['id', 'name', 'allocated_hours', 'claimed_hours'];
+        const json2csvParser = new Parser({ fields });
+        const csv = json2csvParser.parse(results);
+
+        res.setHeader('Content-Disposition', 'attachment; filename=payroll.csv');
+        res.set('Content-Type', 'text/csv');
+        res.status(200).send(csv);
     });
 });
+
 
 // Serve frontend in production
 if (process.env.NODE_ENV === "production") {
@@ -90,14 +101,15 @@ app.post('/till-cash/end-of-day', (req, res) => {
 });
 
 // 📌 Message Board Endpoints
-app.post('/messages', (req, res) => {
-    const { user_id, message, category } = req.body;
-    db.query('INSERT INTO messages (user_id, message, category) VALUES (?, ?, ?)',
-    [user_id, message, category], (err, results) => {
+app.post('/messages/reply', (req, res) => {
+    const { user_id, message, category, parent_id } = req.body;
+    db.query('INSERT INTO messages (user_id, message, category, parent_id) VALUES (?, ?, ?, ?)',
+    [user_id, message, category, parent_id], (err, results) => {
         if (err) return res.status(500).send(err);
-        res.json({ message: "Message posted successfully" });
+        res.json({ message: "Reply posted successfully" });
     });
 });
+
 
 app.get('/messages', (req, res) => {
     const category = req.query.category || 'all';
