@@ -1,21 +1,17 @@
 import React, { useState, useEffect } from 'react';  // Ensure this import is correct
 
 function App() {
-  const [tillCash, setTillCash] = useState([]);  // Correctly using useState
+  const [tillCash, setTillCash] = useState([]);
 
   useEffect(() => {
-    fetch('/till-cash')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Till Cash Data:", data); // Debugging log
-        setTillCash(data);
-      })
-      .catch((error) => console.error("Error fetching till cash:", error));
+    useEffect(() => {
+      fetch('/till-cash')
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("API Response:", data); // ✅ Log the response
+          setTillCash(data);
+        })
+        .catch((error) => console.error("Error fetching till cash:", error));
   }, []);
 
   return (

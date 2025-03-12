@@ -37,8 +37,12 @@ app.get('/', (req, res) => {
 
 // 📌 GET Till Cash Transactions
 app.get('/till-cash', (req, res) => {
-    db.query('SELECT * FROM till_cash_control', (err, results) => {
-        if (err) return res.status(500).send(err);
+    ddb.query('SELECT * FROM till_cash_control', (err, results) => {
+        if (err) {
+            console.error("❌ Database error:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+        console.log("✅ Till Cash Data:", results);
         res.json(results);
     });
 });
