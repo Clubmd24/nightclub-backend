@@ -1,35 +1,34 @@
-import React, { useState, useEffect } from 'react';  // Ensure this import is correct
+import React, { useEffect, useState } from 'react';
 
 function App() {
   const [tillCash, setTillCash] = useState([]);
 
   useEffect(() => {
-    useEffect(() => {
-      fetch('/till-cash')
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("API Response:", data); // ✅ Log the response
-          setTillCash(data);
-        })
-        .catch((error) => console.error("Error fetching till cash:", error));
+    fetch('https://nightclubapp-56121564c956.herokuapp.com/till-cash')
+      .then(response => response.json())
+      .then(data => {
+        console.log("API Response:", data);
+        setTillCash(data);
+      })
+      .catch(error => console.error("Error fetching till cash:", error));
   }, []);
 
   return (
     <div>
       <h1>Nightclub Till Cash Control</h1>
-      <ul>
-        {tillCash.length > 0 ? (
-          tillCash.map((item, index) => (
+      {tillCash.length === 0 ? (
+        <p>No data available.</p>
+      ) : (
+        <ul>
+          {tillCash.map((item, index) => (
             <li key={index}>
-              {item.name || "Unknown"} - ${item.amount || "0.00"}
+              {item.name} - ${item.amount}
             </li>
-          ))
-        ) : (
-          <p>No data available.</p>
-        )}
-      </ul>
+          ))}
+        </ul>
+      )}
     </div>
-  );
+  ); // ✅ Ensure this closing bracket exists
 }
 
-export default App;
+export default App; // ✅ Ensure this export exists
