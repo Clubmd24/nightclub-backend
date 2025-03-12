@@ -53,13 +53,14 @@ app.post('/till-cash/declare-float', (req, res) => {
     const total_float = (50 * fifty) + (20 * twenty) + (10 * ten) + (5 * five) + (2 * two) + (1 * one) +
                          (0.5 * fifty_p) + (0.2 * twenty_p) + (0.1 * ten_p) + (0.05 * five_p) + (0.01 * copper);
 
-    db.query('INSERT INTO till_cash_control (manager_id, type, fifty, twenty, ten, five, two, one, fifty_p, twenty_p, ten_p, five_p, copper, total_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [manager_id, 'float', fifty, twenty, ten, five, two, one, fifty_p, twenty_p, ten_p, five_p, copper, total_float],
-    (err, results) => {
-        if (err) return res.status(500).send(err);
-        res.json({ message: "Float declared successfully", total_float });
-    });
-});
+                         db.query('INSERT INTO till_cash_control (manager_id, cash_amount, transaction_date) VALUES (?, ?, NOW())',
+                            [manager_id, cash_amount],
+                            (err, results) => {
+                                if (err) return res.status(500).send(err);
+                                res.json({ message: "Till cash recorded successfully", cash_amount });
+                            }
+                        );
+                        
 
 // 📌 POST End-of-Day Cash Count
 app.post('/till-cash/end-of-day', (req, res) => {
@@ -68,13 +69,14 @@ app.post('/till-cash/end-of-day', (req, res) => {
                          (0.5 * fifty_p) + (0.2 * twenty_p) + (0.1 * ten_p) + (0.05 * five_p) + (0.01 * copper);
     const variance = actual_cash + pdq_total - expected_total;
 
-    db.query('INSERT INTO till_cash_control (manager_id, type, fifty, twenty, ten, five, two, one, fifty_p, twenty_p, ten_p, five_p, copper, total_amount, variance) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [manager_id, 'end-of-day', fifty, twenty, ten, five, two, one, fifty_p, twenty_p, ten_p, five_p, copper, actual_cash, variance],
+    db.query('INSERT INTO till_cash_control (manager_id, cash_amount, transaction_date) VALUES (?, ?, NOW())',
+    [manager_id, cash_amount],
     (err, results) => {
         if (err) return res.status(500).send(err);
-        res.json({ message: "End-of-Day cash count recorded", actual_cash, variance });
-    });
-});
+        res.json({ message: "Till cash recorded successfully", cash_amount });
+    }
+);
+
 
 // 📌 GET Payroll Report
 app.get('/payroll', (req, res) => {
@@ -119,4 +121,4 @@ app.post('/clock-out', (req, res) => {
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
-});
+}
