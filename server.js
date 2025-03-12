@@ -74,16 +74,21 @@ app.post('/till-cash/end-of-day', (req, res) => {
 
 // 📌 GET Payroll Report
 app.get('/payroll', (req, res) => {
-    db.query(`SELECT users.id, users.name, shifts.allocated_hours, SUM(TIMESTAMPDIFF(HOUR, clock_in, clock_out)) AS claimed_hours 
-              FROM users 
-              JOIN shifts ON users.id = shifts.user_id 
-              LEFT JOIN clock_ins ON users.id = clock_ins.user_id 
-              GROUP BY users.id, users.name, shifts.allocated_hours`, 
-    (err, results) => {
-        if (err) return res.status(500).send(err);
+    const query = `
+        SELECT users.id, users.name, 
+               IFNULL(shifts.allocated_hours, 0) AS allocated_hours, 
+               IFNULL(SUM(TIMESTAMPDIFF(HOUR, clock_ins.clock_in, clock_ins.clock_out)), 0) AS claimed_hours 
+        FROM users
+        LEFT JOIN shifts ON users.id = shifts.user_id 
+        LEFT JOIN clock_ins ON users.id = clock_ins.user_id 
+        GROUP BY users.id, users.name, shifts.allocated_hours`;
+
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
         res.json(results);
     });
 });
+
 
 // 📌 Message Board Endpoints
 app.post('/messages', (req, res) => {
