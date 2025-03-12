@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
 
 // 📌 GET Till Cash Transactions
 app.get('/till-cash', (req, res) => {
-    ddb.query('SELECT * FROM till_cash_control', (err, results) => {
+    db.query('SELECT * FROM till_cash_control', (err, results) => {
         if (err) {
             console.error("❌ Database error:", err);
             return res.status(500).json({ error: "Database error" });
